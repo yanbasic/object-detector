@@ -3,6 +3,7 @@ FROM ubuntu:18.04
 RUN apt-get -y update && \
     apt-get install -y libdmtx0a \
     wget \
+    unzip \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
