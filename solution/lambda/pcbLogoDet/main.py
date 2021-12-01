@@ -6,9 +6,9 @@ from pylibdmtx.pylibdmtx import decode
 from utils import letterbox, non_max_suppression
 import torch
 
-MODEL_FULL_PATH = '/opt/ml/model/yolov5s/weights/best.torchscript.pt'
+MODEL_FULL_PATH = '/opt/program/yolov5s/weights/best.torchscript.pt'
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = 'cpu'
 class_names = [
     "2D_CODE", "Caution", "3C", "EAC", "UL2", "WEEE", "KC", "ATEX",
     "FM2", "Failsafe", "RCM", "FM", "CE", "UL1"]
@@ -16,6 +16,7 @@ class_names = [
 # load yolo-v5 pre-trained model weights
 detector = torch.jit.load(MODEL_FULL_PATH, map_location=device)
 detector.eval()
+print("Load object detection model successfully.")
 
 # load data matrix code recognizer
 data_matrix_code_decoder = decode
@@ -69,6 +70,7 @@ def handler(event, context):
     pred = non_max_suppression(
         prediction=outputs, conf_thres=0.50, iou_thres=0.50, classes=None, agnostic=False, max_det=100)
     detections = pred[0].cpu().numpy()
+    print("detections.shape = {}".format(detections.shape))
 
     # resize back to original image scale
     ret_detections = {
@@ -110,6 +112,8 @@ def handler(event, context):
                 "confidence": confidence,
                 "cls_name": cls_name
             })
+
+    print("ret_detections = {}".format(ret_detections))
 
     # return response
     response = {
