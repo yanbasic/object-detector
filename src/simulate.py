@@ -14,7 +14,7 @@ def get_base64_encoding(full_path):
 
 
 if __name__ == '__main__':
-    endpoint = 'https://wxsj5b7oyb.execute-api.cn-north-1.amazonaws.com.cn/prod/detect'
+    endpoint = 'https://svpb60ctjb.execute-api.cn-north-1.amazonaws.com.cn/prod/detect'
     image_base64_enc = get_base64_encoding(full_path="../test_imgs/IMG_SIMENS_0001.jpg")
 
     request_body = {
