@@ -77,7 +77,7 @@ class PerfEstimator(object):
 
         return samples
 
-    def estimate(self, subset='trainval'):
+    def estimate(self, subset='trainval', enable_vis=False):
         """
         Estimate the performance of given dataset
 
@@ -93,7 +93,10 @@ class PerfEstimator(object):
 
             image = cv2.imread(sample['image_full_path'], cv2.IMREAD_COLOR)
             height, width, channels = image.shape
-            res = self.inference(image, dump_image_name=sample['image_full_path'].split("/images/")[1])
+            res = self.inference(
+                image,
+                dump_image_name=sample['image_full_path'].split("/images/")[1],
+                enable_vis=enable_vis)
             labels = sample['label']
             detections.append(res)
 
@@ -125,7 +128,7 @@ class PerfEstimator(object):
             data_matrix_count_decode_success,
             float(data_matrix_count_decode_success)/data_matrix_count))
 
-    def inference(self, image, dump_image_name):
+    def inference(self, image, dump_image_name, enable_vis=False):
         """
         inference on given image, detect all interested objects, including
 
@@ -194,15 +197,17 @@ class PerfEstimator(object):
                 })
 
             # visualization
-            color = self._vis_colors[self._class_names[cls_id]]
-            color = (color[2], color[1], color[0])
-            label_info = '{} {:.3f}'.format(self._class_names[int(det[5])], det[4])
-            vis_image = cv2.rectangle(image, (int(x_min), int(y_min)), (int(x_max), int(y_max)), color, 5)
-            vis_image = cv2.putText(
-                vis_image, label_info, (int(x_min), int(y_min) - 10),
-                cv2.FONT_HERSHEY_SIMPLEX, 1.0, color, 2, cv2.LINE_AA)
+            if enable_vis:
+                color = self._vis_colors[self._class_names[cls_id]]
+                color = (color[2], color[1], color[0])
+                label_info = '{} {:.3f}'.format(self._class_names[int(det[5])], det[4])
+                vis_image = cv2.rectangle(image, (int(x_min), int(y_min)), (int(x_max), int(y_max)), color, 5)
+                vis_image = cv2.putText(
+                    vis_image, label_info, (int(x_min), int(y_min) - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.0, color, 2, cv2.LINE_AA)
 
-        cv2.imwrite(os.path.join(self._vis_root_dir, dump_image_name), vis_image)
+        if enable_vis:
+            cv2.imwrite(os.path.join(self._vis_root_dir, dump_image_name), vis_image)
         return ret_detections
 
     def recognize_data_matrix_code(self, roi):
@@ -214,7 +219,11 @@ class PerfEstimator(object):
         """
         roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
         height, width = roi.shape
-        roi = cv2.resize(roi, dsize=(width // 2, height // 2))
+
+        target_width = 100.0
+        scale = target_width / width
+        dim = (int(target_width), int(height * scale))            # (width, height)
+        roi = cv2.resize(roi, dim, interpolation=cv2.INTER_AREA)
         code = self._data_matrix_code_decoder(roi)
 
         code = code[0].data.decode('utf-8') if len(code) != 0 else ""
@@ -230,4 +239,4 @@ if __name__ == '__main__':
         val_txt_full_path="../dataset/factory/val.txt"
     )
 
-    estimator.estimate(subset='val')
+    estimator.estimate(subset='val', enable_vis=False)
