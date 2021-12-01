@@ -118,7 +118,7 @@ def handler(event, context):
     # return response
     response = {
         'statusCode': 200,
-        'body': json.dumps(ret_detections),
+        'body': json.dumps(ret_detections, ensure_ascii=False),
         "headers":
             {
                 "Content-Type": "application/json",
