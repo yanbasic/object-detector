@@ -86,7 +86,7 @@ def handler(event, context):
         x_max = int((det[2] - dw) / scale_w)
         y_max = int((det[3] - dh) / scale_h)
 
-        confidence = det[4]
+        confidence = float(det[4])
         cls_id = int(det[5])
         cls_name = class_names[cls_id]
 
