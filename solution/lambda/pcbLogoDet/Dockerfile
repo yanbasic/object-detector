@@ -1,5 +1,7 @@
 FROM ubuntu:18.04
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get -y update && \
     apt-get install -y libdmtx0a \
     wget \
@@ -14,8 +16,13 @@ RUN pip3 install --no-cache  torch==1.7.1 \
     pylibdmtx==0.1.9 \
     opencv-python==4.5.4.60
 
-COPY main.py ./
-COPY utils.py ./
-RUN wget -c https://simens.s3.amazonaws.com/models/yolov5s.zip && unzip yolov5s.zip
+COPY main.py /opt/program/.
+COPY utils.py /opt/program/.
+
+RUN mkdir -p /opt/ml/model
+RUN wget -c https://simens.s3.amazonaws.com/models/yolov5s.zip -O /opt/ml/model/yolov5s.zip
+RUN cd /opt/ml/model/ && unzip yolov5s.zip && rm -rf yolov5s.zip
+
+ENV PATH="/opt/program:${PATH}"
 
 CMD [ "main.handler" ]

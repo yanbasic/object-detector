@@ -12,7 +12,7 @@ export class SolutionStack extends cdk.Stack {
      */
     const factory2DCodeRecognizer = new lambda.DockerImageFunction(
         this,
-        'northStarLoginAuth',
+        'factory2DCodeRecognizer',
         {
             code: lambda.DockerImageCode.fromImageAsset('./lambda/pcbLogoDet'),
             timeout: cdk.Duration.seconds(15),

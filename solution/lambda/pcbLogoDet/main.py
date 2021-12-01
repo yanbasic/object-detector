@@ -6,7 +6,7 @@ from pylibdmtx.pylibdmtx import decode
 from utils import letterbox, non_max_suppression
 import torch
 
-MODEL_FULL_PATH = '/var/task/yolov5s/weights/best.torchscript.pt'
+MODEL_FULL_PATH = '/opt/ml/model/yolov5s/weights/best.torchscript.pt'
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 class_names = [
