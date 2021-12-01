@@ -2,9 +2,10 @@ import torch
 import cv2
 import numpy as np
 import os
+import time
+from PIL import Image
 from pylibdmtx.pylibdmtx import decode
 from utils import letterbox, non_max_suppression
-import matplotlib.pylab as plt
 
 
 class PerfEstimator(object):
@@ -183,7 +184,8 @@ class PerfEstimator(object):
                 roi_x_max = min(width, x_max+margin)
 
                 roi = image[roi_y_min:roi_y_max, roi_x_min:roi_x_max]
-                code = self.recognize_data_matrix_code(roi=roi, sample_name=dump_image_name.split(".jpg")[0])
+                code = self.recognize_data_matrix_code(
+                    roi=roi, sample_name=dump_image_name.split(".jpg")[0], enable_vis=enable_vis)
 
                 ret_detections.append({
                     "bbox": [x_min, y_min, x_max, y_max],
@@ -212,28 +214,40 @@ class PerfEstimator(object):
             cv2.imwrite(os.path.join(self._vis_root_dir, dump_image_name), vis_image)
         return ret_detections
 
-    def recognize_data_matrix_code(self, roi, sample_name):
+    def recognize_data_matrix_code(self, roi, sample_name, enable_vis):
         """
         recognize the content of the given data matrix
 
         :param roi: BGR image data, which is loaded with cv2.imread interface
         :return: code content, string
         """
+        # t1 = time.time()
         roi = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
         height, width, _ = roi.shape
         target_width = 100.0
         scale = target_width / width
         dim = (int(target_width), int(height * scale))            # (width, height)
         resized_roi = cv2.resize(roi, dim, interpolation=cv2.INTER_AREA)
-        code = self._data_matrix_code_decoder(resized_roi)
-        code = code[0].data.decode('utf-8') if len(code) != 0 else ""
+        pil_image = Image.fromarray(resized_roi)
 
-        if code == "":
-            dump_full_path = os.path.join(self._vis_root_dir, "failed", sample_name + "_2D_CODE.jpg")
-        else:
-            dump_full_path = os.path.join(self._vis_root_dir, "success", sample_name + "_2D_CODE.jpg")
+        for degree in np.arange(0, 360, 45):
+            input_roi = pil_image.rotate(degree, expand=True)
+            code = self._data_matrix_code_decoder(input_roi)
+            code = code[0].data.decode('utf-8') if len(code) != 0 else ""
 
-        cv2.imwrite(dump_full_path, cv2.cvtColor(roi, cv2.COLOR_RGB2BGR))
+            if code != "":
+                break
+
+        if enable_vis:
+            if code == "":
+                dump_full_path = os.path.join(self._vis_root_dir, "failed", sample_name + "_2D_CODE.jpg")
+            else:
+                dump_full_path = os.path.join(self._vis_root_dir, "success", sample_name + "_2D_CODE.jpg")
+
+            cv2.imwrite(dump_full_path, cv2.cvtColor(roi, cv2.COLOR_RGB2BGR))
+
+        # t2 = time.time()
+        # print("Time cost = {} ms".format(1000 * (t2 - t1)))
         return code
 
 

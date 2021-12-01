@@ -114,7 +114,6 @@ class InferenceExample(object):
         resized_roi = cv2.resize(roi, dim, interpolation=cv2.INTER_AREA)
         code = self._data_matrix_code_decoder(resized_roi)
         code = code[0].data.decode('utf-8') if len(code) != 0 else ""
-
         return code
 
 
