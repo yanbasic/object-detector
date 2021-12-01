@@ -27,6 +27,10 @@ WORKDIR ${FUNCTION_DIR}
 RUN wget -c https://simens.s3.amazonaws.com/models/yolov5s.zip -O ${FUNCTION_DIR}/yolov5s.zip
 RUN cd ${FUNCTION_DIR} && unzip yolov5s.zip && rm -rf yolov5s.zip
 
+ENV PYTHONUNBUFFERED=TRUE
+ENV PYTHONDONTWRITEBYTECODE=TRUE
+ENV PYTHONIOENCODING="utf8"
+
 ENTRYPOINT [ "python3", "-m", "awslambdaric" ]
 CMD [ "main.handler" ]
 
