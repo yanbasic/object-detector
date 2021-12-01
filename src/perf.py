@@ -2,8 +2,9 @@ import torch
 import cv2
 import numpy as np
 import os
-from pylibdmtx.pylibdmtx import decode, Decoded
+from pylibdmtx.pylibdmtx import decode
 from utils import letterbox, non_max_suppression
+import matplotlib.pylab as plt
 
 
 class PerfEstimator(object):
@@ -25,7 +26,8 @@ class PerfEstimator(object):
         # create visualization directory
         self._vis_root_dir = vis_root_dir
         if not os.path.exists(self._vis_root_dir):
-            os.makedirs(self._vis_root_dir)
+            os.system("mkdir -p ../vis/failed/")
+            os.system("mkdir -p ../vis/success/")
 
         self._device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self._class_names = ["2D_CODE", "Caution", "3C", "EAC", "UL2", "WEEE", "KC", "ATEX", "FM2", "Failsafe",
@@ -181,7 +183,7 @@ class PerfEstimator(object):
                 roi_x_max = min(width, x_max+margin)
 
                 roi = image[roi_y_min:roi_y_max, roi_x_min:roi_x_max]
-                code = self.recognize_data_matrix_code(roi=roi)
+                code = self.recognize_data_matrix_code(roi=roi, sample_name=dump_image_name.split(".jpg")[0])
 
                 ret_detections.append({
                     "bbox": [x_min, y_min, x_max, y_max],
@@ -210,30 +212,35 @@ class PerfEstimator(object):
             cv2.imwrite(os.path.join(self._vis_root_dir, dump_image_name), vis_image)
         return ret_detections
 
-    def recognize_data_matrix_code(self, roi):
+    def recognize_data_matrix_code(self, roi, sample_name):
         """
         recognize the content of the given data matrix
 
         :param roi: BGR image data, which is loaded with cv2.imread interface
         :return: code content, string
         """
-        roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
-        height, width = roi.shape
-
+        roi = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
+        height, width, _ = roi.shape
         target_width = 100.0
         scale = target_width / width
         dim = (int(target_width), int(height * scale))            # (width, height)
-        roi = cv2.resize(roi, dim, interpolation=cv2.INTER_AREA)
-        code = self._data_matrix_code_decoder(roi)
-
+        resized_roi = cv2.resize(roi, dim, interpolation=cv2.INTER_AREA)
+        code = self._data_matrix_code_decoder(resized_roi)
         code = code[0].data.decode('utf-8') if len(code) != 0 else ""
+
+        if code == "":
+            dump_full_path = os.path.join(self._vis_root_dir, "failed", sample_name + "_2D_CODE.jpg")
+        else:
+            dump_full_path = os.path.join(self._vis_root_dir, "success", sample_name + "_2D_CODE.jpg")
+
+        cv2.imwrite(dump_full_path, cv2.cvtColor(roi, cv2.COLOR_RGB2BGR))
         return code
 
 
 if __name__ == '__main__':
     estimator = PerfEstimator(
         model_full_path='../models/yolov5s/weights/best.torchscript.pt',
-        vis_root_dir="../performance/",
+        vis_root_dir="../vis/",
         dataset_root_dir="../dataset/factory/",
         train_txt_full_path="../dataset/factory/train.txt",
         val_txt_full_path="../dataset/factory/val.txt"
