@@ -224,7 +224,7 @@ class PerfEstimator(object):
         # t1 = time.time()
         roi = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
         height, width, _ = roi.shape
-        target_width = 100.0
+        target_width = 90.0
         scale = target_width / width
         dim = (int(target_width), int(height * scale))            # (width, height)
         resized_roi = cv2.resize(roi, dim, interpolation=cv2.INTER_AREA)
