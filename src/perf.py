@@ -7,6 +7,8 @@ from PIL import Image
 from pylibdmtx.pylibdmtx import decode
 from utils import letterbox, non_max_suppression
 
+time_cost = list()
+
 
 class PerfEstimator(object):
     def __init__(self, model_full_path, vis_root_dir, dataset_root_dir, train_txt_full_path, val_txt_full_path):
@@ -221,7 +223,7 @@ class PerfEstimator(object):
         :param roi: BGR image data, which is loaded with cv2.imread interface
         :return: code content, string
         """
-        # t1 = time.time()
+        t1 = time.time()
         roi = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
         height, width, _ = roi.shape
         target_width = 90.0
@@ -230,7 +232,7 @@ class PerfEstimator(object):
         resized_roi = cv2.resize(roi, dim, interpolation=cv2.INTER_AREA)
         pil_image = Image.fromarray(resized_roi)
 
-        for degree in np.arange(0, 360, 45):
+        for degree in np.arange(0, 360, 360):
             input_roi = pil_image.rotate(degree, expand=True)
             code = self._data_matrix_code_decoder(input_roi)
             code = code[0].data.decode('utf-8') if len(code) != 0 else ""
@@ -246,8 +248,8 @@ class PerfEstimator(object):
 
             cv2.imwrite(dump_full_path, cv2.cvtColor(roi, cv2.COLOR_RGB2BGR))
 
-        # t2 = time.time()
-        # print("Time cost = {} ms".format(1000 * (t2 - t1)))
+        t2 = time.time()
+        time_cost.append(1000 * (t2 - t1))
         return code
 
 
@@ -261,3 +263,7 @@ if __name__ == '__main__':
     )
 
     estimator.estimate(subset='val', enable_vis=False)
+
+    import numpy as np
+    time_cost = np.array(time_cost)
+    print(np.mean(time_cost), np.min(time_cost), np.max(time_cost))
