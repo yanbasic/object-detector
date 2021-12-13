@@ -3,10 +3,10 @@ import * as agw from '@aws-cdk/aws-apigateway';
 import * as lambda from '@aws-cdk/aws-lambda';
 
 
-export class SolutionStack extends cdk.Stack {
+export class OcrWithDetectorSolutionStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-
+    this.templateOptions.description = `(SO8023-ocr) - AI Solution Kits - Infer OCR with Object Detector. Template version v1.0.0`;
     /**
      * Lambda Provision
      */
