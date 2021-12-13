@@ -38,7 +38,65 @@ npm run cdk deploy
 ```
 
 
+### REST API Reference
 
+- HTTP 方法: `POST`
+
+- Body 参数
+
+| **Name**  | **Type**  | **Optional** |  **Description**  |
+|----------|-----------|------------|------------|
+|ocr       |*bool*          |No | 是否包含目标检测结果，默认为false |
+|detection |*bool*          |No | 是否包含OCR文本识别结果，默认为false |
+|image_base64_enc |*String* |No |Base64-encoded image data|
+
+- 请求 Body 示例
+
+``` json
+{
+    "ocr": true,
+    "detection": true,
+    "image_base64_enc": "/9j/4AAQSkZJRgABAQEAeAB4AAD..."
+}
+```
+
+- 返回 示例
+
+``` json
+{
+    "ocr": [
+        {
+            "words": "xxxx",
+            "location": [
+                295,
+                932,
+                472,
+                99
+            ],
+            "confidence": 0.9855925440788269
+        }
+    ],
+    "detection": {
+        "channels": 3,
+        "height": 3225,
+        "width": 2419,
+        "detections": [
+            {
+                "bbox": [
+                    876,
+                    1615,
+                    1141,
+                    1891
+                ],
+                "confidence": 0.9268702268600464,
+                "cls_name": "xxx",
+                "data_matrix_code": "xxx"
+            }
+        ]
+    },
+    "duration": 0.8072800636291504
+}
+```
 
 
 
