@@ -34,7 +34,7 @@ Default output format [None]字段输入您所在的region，如cn-north-1。
 git clone https://github.com/gaowexu/object-detector.git
 cd object-detector/solution
 npm install
-npm run cdk deploy
+npm run cdk deploy -- --require-approval never
 ```
 
 
