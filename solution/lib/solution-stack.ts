@@ -25,7 +25,7 @@ export class OcrWithDetectorSolutionStack extends cdk.Stack {
      */
     const factoryApiRouter = new agw.RestApi(
         this,
-        'factoryApiRouter',
+        'OcrDetectorApiRouter',
         {
             endpointConfiguration: {
                 types: [agw.EndpointType.REGIONAL]
@@ -36,7 +36,10 @@ export class OcrWithDetectorSolutionStack extends cdk.Stack {
             }
         }
     );
-    factoryApiRouter.root.addResource('detect').addMethod('POST', new agw.LambdaIntegration(factory2DCodeRecognizer));
+    factoryApiRouter.root.addResource('detect').addMethod('POST', new agw.LambdaIntegration(factory2DCodeRecognizer),
+    {
+        authorizationType: agw.AuthorizationType.IAM
+    });
 
 
 
