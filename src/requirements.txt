@@ -13,3 +13,4 @@ certifi==2021.5.30
 idna==2.10
 chardet==4.0.0
 pylibdmtx==0.1.9
+aws_requests_auth==0.4.3
