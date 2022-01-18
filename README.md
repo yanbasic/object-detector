@@ -31,7 +31,7 @@ Default output format [None]字段输入您所在的region，如cn-north-1。
 
 #### 步骤四：克隆代码并基于CDK进行部署
 ```angular2html
-git clone https://github.com/gaowexu/object-detector.git
+git clone https://github.com/yanbasic/object-detector.git
 cd object-detector/solution
 npm install
 npm run cdk deploy -- --require-approval never
