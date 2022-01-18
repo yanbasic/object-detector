@@ -16,6 +16,7 @@ RUN apt-get -y update && \
     python3-opencv \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip3 install --upgrade pip==21.3.1 -i https://pypi.tuna.tsinghua.edu.cn/simple
 RUN pip3 install --no-cache  torch==1.7.1 \
     numpy==1.19.5 \
     torchvision==0.8.2 \
