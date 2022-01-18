@@ -32,7 +32,8 @@ RUN pip3 install --no-cache  torch==1.7.1 \
     python-dateutil==2.8.2 \
     certifi==2021.5.30 \
     idna==2.10 \
-    chardet==4.0.0
+    chardet==4.0.0 \
+    -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 RUN mkdir -p ${FUNCTION_DIR}
 COPY main.py ${FUNCTION_DIR}/.
