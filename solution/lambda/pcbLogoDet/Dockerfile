@@ -3,6 +3,10 @@ FROM ubuntu:18.04
 ENV DEBIAN_FRONTEND=noninteractive
 ARG FUNCTION_DIR="/opt/program"
 
+RUN sed -i s@/security.ubuntu.com@/mirrors.tuna.tsinghua.edu.cn@g /etc/apt/sources.list
+RUN sed -i s@/archive.ubuntu.com@/mirrors.tuna.tsinghua.edu.cn@g /etc/apt/sources.list
+RUN cat /etc/apt/sources.list
+
 RUN apt-get -y update && \
     apt-get install -y libdmtx0a \
     wget \
@@ -12,7 +16,6 @@ RUN apt-get -y update && \
     python3-opencv \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install --upgrade pip==21.3.1
 RUN pip3 install --no-cache  torch==1.7.1 \
     numpy==1.19.5 \
     torchvision==0.8.2 \
