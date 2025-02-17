@@ -1,0 +1,63 @@
+name: Commit Message Check
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  check-commit-message:
+    name: Check Commit Message
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Check Commit Messages
+        run: |
+          # Function to check commit message format
+          check_commit_message() {
+            local message="\$1"
+            
+            # Define allowed prefixes
+            local prefixes="feat:|fix:|doc:|chore:|refactor:|test:|style:|perf:|build:|ci:|revert:"
+            
+            # Check if message starts with allowed prefix
+            if ! echo "\$message" | grep -qE "^(\$prefixes)"; then
+              echo "Error: Commit message must start with one of these prefixes:"
+              echo "feat:, fix:, doc:, chore:, refactor:, test:, style:, perf:, build:, ci:, revert:"
+              return 1
+            fi
+            
+            # Count words (excluding the prefix)
+            local content=\$(echo "\$message" | sed -E "s/^(\$prefixes) //")
+            local word_count=\$(echo "\$content" | wc -w)
+            
+            if [ "\$word_count" -lt 5 ]; then
+              echo "Error: Commit message content (excluding prefix) must be at least 5 words."
+              return 1
+            fi
+            
+            return 0
+          }
+
+          # For Pull Requests
+          if [ "\${{ github.event_name }}" == "pull_request" ]; then
+            PR_TITLE="\${{ github.event.pull_request.title }}"
+            if ! check_commit_message "\$PR_TITLE"; then
+              echo "Pull Request title does not meet the requirements"
+              exit 1
+            fi
+          fi
+
+          # For direct commits
+          if [ "\${{ github.event_name }}" == "push" ]; then
+            # Get the commit message
+            COMMIT_MSG=\$(git log --format=%B -n 1 \${{ github.sha }})
+            if ! check_commit_message "\$COMMIT_MSG"; then
+              echo "Commit message does not meet the requirements"
+              exit 1
+            fi
+          fi
